@@ -1029,6 +1029,7 @@ function setupEvents() {
   // Country Selector in Top Left
   el.countryFilter.addEventListener('change', (e) => {
     state.country = e.target.value;
+    try { localStorage.setItem('mv_selected_destination', state.country); } catch (e) {}
     state.feedPage = 1;
     const destName = e.target.options[e.target.selectedIndex].text;
     showToast(`Switching to ${destName}...`, '🌍');
@@ -1141,6 +1142,15 @@ function setupEvents() {
 // Initial Boot
 document.addEventListener('DOMContentLoaded', () => {
   setupEvents();
+
+  // Restore saved destination preference if previously chosen
+  try {
+    const savedDest = localStorage.getItem('mv_selected_destination');
+    if (savedDest && el.countryFilter) {
+      state.country = savedDest;
+      el.countryFilter.value = savedDest;
+    }
+  } catch (e) {}
 
   // Set today date
   const now = new Date();

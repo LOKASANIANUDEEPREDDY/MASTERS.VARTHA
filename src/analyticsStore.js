@@ -79,6 +79,15 @@ class AnalyticsStore {
     }
   }
 
+  getDestinationCounts() {
+    const counts = {};
+    for (const v of this.visitors.values()) {
+      const d = (v.lastDestination || 'us').toLowerCase();
+      counts[d] = (counts[d] || 0) + 1;
+    }
+    return counts;
+  }
+
   saveToDisk() {
     try {
       if (!fs.existsSync(WRITE_DIR)) {
@@ -87,7 +96,7 @@ class AnalyticsStore {
       const serialized = {
         visitors: Array.from(this.visitors.values()),
         events: this.events.slice(-200),
-        destinations: this.destinations,
+        destinations: this.getDestinationCounts(),
         totalEvents: this.totalEvents,
         updatedAt: new Date().toISOString()
       };
@@ -132,21 +141,22 @@ class AnalyticsStore {
     if (countryCode && countryCode !== 'UNKNOWN') visitor.countryCode = effectiveCountry;
     if (city && city !== 'Unknown City') visitor.city = effectiveCity;
 
-    // Track specific actions
-    this.totalEvents++;
-    visitor.totalInteractions++;
+    // Track specific actions - heartbeats MUST NOT increment interactions or events
+    if (action && action !== 'heartbeat') {
+      this.totalEvents++;
+      visitor.totalInteractions++;
 
-    if (action === 'pageview') {
-      visitor.views++;
-    } else if (action === 'bookmark') {
-      visitor.bookmarks++;
-    } else if (action === 'filter_country' || action === 'filter_profession') {
-      visitor.filtersChanged++;
-    }
-
-    // Destination interest tracking
-    if (effectiveDest) {
-      this.destinations[effectiveDest] = (this.destinations[effectiveDest] || 0) + 1;
+      if (action === 'pageview') {
+        const lastViewTime = visitor.lastViewTime || 0;
+        if (now - lastViewTime > 15000) {
+          visitor.views++;
+          visitor.lastViewTime = now;
+        }
+      } else if (action === 'bookmark') {
+        visitor.bookmarks++;
+      } else if (action === 'filter_country' || action === 'filter_profession') {
+        visitor.filtersChanged++;
+      }
     }
 
     // Record in activity event stream
@@ -218,9 +228,10 @@ class AnalyticsStore {
       })
       .sort((a, b) => b.count - a.count);
 
-    // 2. Destination Country Interest breakdown
-    const destTotal = Object.values(this.destinations).reduce((a, b) => a + b, 0) || 1;
-    const destinationInterest = Object.entries(this.destinations)
+    // 2. Destination Country Interest breakdown (per unique visitor preference)
+    const destCounts = this.getDestinationCounts();
+    const destTotal = Object.values(destCounts).reduce((a, b) => a + b, 0) || 1;
+    const destinationInterest = Object.entries(destCounts)
       .map(([code, count]) => {
         const destMeta = {
           us: { name: 'United States', flag: '🇺🇸' },

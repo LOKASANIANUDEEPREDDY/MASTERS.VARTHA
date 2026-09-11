@@ -50,15 +50,16 @@
       "label": "Visitor #TION",
       "countryCode": "IN",
       "city": "Hyderabad",
-      "views": 1,
+      "views": 2,
       "bookmarks": 0,
-      "filtersChanged": 0,
-      "totalInteractions": 1,
+      "filtersChanged": 2,
+      "totalInteractions": 8,
       "firstSeen": 1789157325235,
-      "lastActiveAt": 1789157325235,
+      "lastActiveAt": 1789157467091,
       "device": "Mobile",
       "lastDestination": "us",
-      "lastProfession": "cs"
+      "lastProfession": "cs",
+      "lastViewTime": 1789157460887
     },
     {
       "id": "usr_test_phone2",
@@ -77,6 +78,97 @@
     }
   ],
   "events": [
+    {
+      "id": "nd89jkr",
+      "visitorId": "usr_test_verification",
+      "visitorLabel": "Visitor #TION",
+      "countryCode": "IN",
+      "countryName": "India",
+      "flag": "🇮🇳",
+      "city": "Hyderabad",
+      "action": "filter_country",
+      "details": "",
+      "destination": "US",
+      "timestamp": 1789157467091
+    },
+    {
+      "id": "w2zwvfg",
+      "visitorId": "usr_test_verification",
+      "visitorLabel": "Visitor #TION",
+      "countryCode": "IN",
+      "countryName": "India",
+      "flag": "🇮🇳",
+      "city": "Hyderabad",
+      "action": "filter_country",
+      "details": "",
+      "destination": "CA",
+      "timestamp": 1789157463820
+    },
+    {
+      "id": "u03aa72",
+      "visitorId": "usr_test_verification",
+      "visitorLabel": "Visitor #TION",
+      "countryCode": "IN",
+      "countryName": "India",
+      "flag": "🇮🇳",
+      "city": "Hyderabad",
+      "action": "pageview",
+      "details": "",
+      "destination": "US",
+      "timestamp": 1789157460914
+    },
+    {
+      "id": "k8owfy7",
+      "visitorId": "usr_test_verification",
+      "visitorLabel": "Visitor #TION",
+      "countryCode": "IN",
+      "countryName": "India",
+      "flag": "🇮🇳",
+      "city": "Hyderabad",
+      "action": "pageview",
+      "details": "",
+      "destination": "US",
+      "timestamp": 1789157460907
+    },
+    {
+      "id": "fr55568",
+      "visitorId": "usr_test_verification",
+      "visitorLabel": "Visitor #TION",
+      "countryCode": "IN",
+      "countryName": "India",
+      "flag": "🇮🇳",
+      "city": "Hyderabad",
+      "action": "pageview",
+      "details": "",
+      "destination": "US",
+      "timestamp": 1789157460901
+    },
+    {
+      "id": "emraqwz",
+      "visitorId": "usr_test_verification",
+      "visitorLabel": "Visitor #TION",
+      "countryCode": "IN",
+      "countryName": "India",
+      "flag": "🇮🇳",
+      "city": "Hyderabad",
+      "action": "pageview",
+      "details": "",
+      "destination": "US",
+      "timestamp": 1789157460894
+    },
+    {
+      "id": "8efw12f",
+      "visitorId": "usr_test_verification",
+      "visitorLabel": "Visitor #TION",
+      "countryCode": "IN",
+      "countryName": "India",
+      "flag": "🇮🇳",
+      "city": "Hyderabad",
+      "action": "pageview",
+      "details": "",
+      "destination": "US",
+      "timestamp": 1789157460887
+    },
     {
       "id": "wf1ta08",
       "visitorId": "usr_test_phone2",
@@ -157,9 +249,9 @@
     }
   ],
   "destinations": {
-    "us": 5,
-    "uk": 1
+    "uk": 1,
+    "us": 4
   },
-  "totalEvents": 6,
-  "updatedAt": "2026-09-11T20:08:48.413Z"
+  "totalEvents": 13,
+  "updatedAt": "2026-09-11T20:11:07.091Z"
 }
