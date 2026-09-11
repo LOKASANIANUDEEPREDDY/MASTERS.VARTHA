@@ -4,8 +4,10 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_DIR = path.join(__dirname, '..', 'data');
-const ANALYTICS_FILE = path.join(DATA_DIR, 'analytics.json');
+const IS_VERCEL = !!process.env.VERCEL;
+const SEED_FILE = path.join(__dirname, '..', 'data', 'analytics.json');
+const WRITE_DIR = IS_VERCEL ? path.join('/tmp', 'masters-vartha-data') : path.join(__dirname, '..', 'data');
+const ANALYTICS_FILE = path.join(WRITE_DIR, 'analytics.json');
 
 // Country Code to Name and Flag map
 const COUNTRY_INFO = {
@@ -52,8 +54,12 @@ class AnalyticsStore {
 
   loadFromDisk() {
     try {
-      if (fs.existsSync(ANALYTICS_FILE)) {
-        const raw = fs.readFileSync(ANALYTICS_FILE, 'utf-8');
+      let fileToRead = ANALYTICS_FILE;
+      if (!fs.existsSync(fileToRead) && fs.existsSync(SEED_FILE)) {
+        fileToRead = SEED_FILE;
+      }
+      if (fs.existsSync(fileToRead)) {
+        const raw = fs.readFileSync(fileToRead, 'utf-8');
         const data = JSON.parse(raw);
         if (data.visitors && Array.isArray(data.visitors)) {
           data.visitors.forEach(v => this.visitors.set(v.id, v));
@@ -75,8 +81,8 @@ class AnalyticsStore {
 
   saveToDisk() {
     try {
-      if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
+      if (!fs.existsSync(WRITE_DIR)) {
+        fs.mkdirSync(WRITE_DIR, { recursive: true });
       }
       const serialized = {
         visitors: Array.from(this.visitors.values()),
@@ -87,7 +93,7 @@ class AnalyticsStore {
       };
       fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(serialized, null, 2), 'utf-8');
     } catch (err) {
-      // In serverless environments, writing to disk might fail gracefully
+      // In serverless environments, handle gracefully
     }
   }
 
@@ -166,13 +172,19 @@ class AnalyticsStore {
     // Debounced disk save
     this.saveToDisk();
 
+    const visitorMeta = getCountryMeta(visitor.countryCode);
+
     return {
       liveUsers: this.getLiveUsersCount(),
-      visitorId
+      visitorId,
+      countryCode: visitor.countryCode,
+      countryName: visitorMeta.name,
+      flag: visitorMeta.flag,
+      city: visitor.city
     };
   }
 
-  getLiveUsersCount(windowMs = 3 * 60 * 1000) {
+  getLiveUsersCount(windowMs = 90 * 1000) {
     const cutoff = Date.now() - windowMs;
     let live = 0;
     for (const v of this.visitors.values()) {

@@ -689,7 +689,7 @@ window.toggleSaveArticle = async function(id) {
 };
 
 // ==========================================================================
-// Analytics & Live User Tracking
+// Real-Time Analytics & Live User Tracking (WebSockets + HTTP Fallback)
 // ==========================================================================
 let visitorId = localStorage.getItem('mv_visitor_id');
 if (!visitorId) {
@@ -702,6 +702,171 @@ function getDeviceType() {
   if (width < 768) return 'Mobile';
   if (width < 1024) return 'Tablet';
   return 'Desktop';
+}
+
+const PRESENCE_TOPIC = 'mastersvartha/live/v1/presence';
+const EVENTS_TOPIC = 'mastersvartha/live/v1/events';
+
+let mqttClient = null;
+const liveActiveDevices = new Map(); // visitorId -> { visitorId, device, city, country, flag, destination, lastSeen }
+let clientGeoInfo = { country: 'IN', city: 'Hyderabad', flag: '🇮🇳' };
+
+function updateLiveCounterUI(count) {
+  const displayCount = Math.max(1, count);
+  if (el.headerLiveUsersText) {
+    const prevText = el.headerLiveUsersText.textContent;
+    const newText = `${displayCount} Online`;
+    if (prevText !== newText) {
+      el.headerLiveUsersText.textContent = newText;
+      el.headerLiveUsersText.classList.remove('live-bump');
+      void el.headerLiveUsersText.offsetWidth; // trigger reflow
+      el.headerLiveUsersText.classList.add('live-bump');
+    }
+  }
+  if (el.kpiLiveUsers) {
+    el.kpiLiveUsers.textContent = displayCount;
+  }
+}
+
+function calculateCurrentLiveCount() {
+  const now = Date.now();
+  // Cutoff of 40 seconds for active presence
+  const cutoff = now - 40000;
+  for (const [id, dev] of liveActiveDevices.entries()) {
+    if (dev.lastSeen < cutoff && id !== visitorId) {
+      liveActiveDevices.delete(id);
+    }
+  }
+  return Math.max(1, liveActiveDevices.size);
+}
+
+function broadcastSelfPresence(status = 'online') {
+  if (!mqttClient || !mqttClient.connected) return;
+  const data = {
+    visitorId,
+    status,
+    device: getDeviceType(),
+    city: clientGeoInfo.city,
+    country: clientGeoInfo.country,
+    flag: clientGeoInfo.flag,
+    destination: (state.country || 'US').toUpperCase(),
+    timestamp: Date.now()
+  };
+  mqttClient.publish(`${PRESENCE_TOPIC}/${visitorId}`, JSON.stringify(data), { qos: 0 });
+}
+
+function broadcastLiveEvent(action, details) {
+  if (!mqttClient || !mqttClient.connected) return;
+  const data = {
+    visitorId,
+    action,
+    details,
+    destination: (state.country || 'US').toUpperCase(),
+    timestamp: Date.now()
+  };
+  mqttClient.publish(EVENTS_TOPIC, JSON.stringify(data), { qos: 0 });
+}
+
+function initRealtimePresence() {
+  // Always include self immediately
+  liveActiveDevices.set(visitorId, {
+    visitorId,
+    device: getDeviceType(),
+    city: clientGeoInfo.city || 'Your Location',
+    country: clientGeoInfo.country || 'IN',
+    flag: clientGeoInfo.flag || '🇮🇳',
+    destination: (state.country || 'US').toUpperCase(),
+    lastSeen: Date.now()
+  });
+  updateLiveCounterUI(liveActiveDevices.size);
+
+  if (typeof mqtt === 'undefined') {
+    console.warn('[Presence] MQTT library unavailable, using HTTP sync fallback');
+    return;
+  }
+
+  try {
+    const clientId = 'mv_' + Math.random().toString(36).substring(2, 11);
+    mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+      clientId,
+      clean: true,
+      connectTimeout: 6000,
+      reconnectPeriod: 3000,
+      keepalive: 25,
+      will: {
+        topic: `${PRESENCE_TOPIC}/${visitorId}`,
+        payload: JSON.stringify({ visitorId, status: 'offline', timestamp: Date.now() }),
+        qos: 0,
+        retain: false
+      }
+    });
+
+    mqttClient.on('connect', () => {
+      console.log('[Presence] Real-time live presence connected');
+      mqttClient.subscribe(`${PRESENCE_TOPIC}/+`, { qos: 0 });
+      mqttClient.subscribe(EVENTS_TOPIC, { qos: 0 });
+      broadcastSelfPresence('online');
+    });
+
+    mqttClient.on('message', (topic, message) => {
+      try {
+        const payload = JSON.parse(message.toString());
+        if (topic.startsWith(PRESENCE_TOPIC)) {
+          if (payload.status === 'offline') {
+            liveActiveDevices.delete(payload.visitorId);
+          } else {
+            liveActiveDevices.set(payload.visitorId, {
+              visitorId: payload.visitorId,
+              device: payload.device || 'Desktop',
+              city: payload.city || 'Unknown',
+              country: payload.country || 'IN',
+              flag: payload.flag || '🌐',
+              destination: (payload.destination || 'US').toUpperCase(),
+              lastSeen: payload.timestamp || Date.now()
+            });
+          }
+          const liveCount = calculateCurrentLiveCount();
+          updateLiveCounterUI(liveCount);
+
+          if (el.analyticsModal && el.analyticsModal.style.display === 'flex') {
+            loadAnalyticsDashboard();
+          }
+        } else if (topic === EVENTS_TOPIC) {
+          if (el.analyticsModal && el.analyticsModal.style.display === 'flex') {
+            loadAnalyticsDashboard();
+          }
+        }
+      } catch (e) {
+        // ignore parse errors
+      }
+    });
+
+    mqttClient.on('error', (err) => {
+      console.warn('[Presence] Real-time broker connection error, falling back to HTTP sync', err);
+    });
+
+    // Heartbeat every 10 seconds over WebSocket
+    setInterval(() => {
+      const selfDev = liveActiveDevices.get(visitorId);
+      if (selfDev) selfDev.lastSeen = Date.now();
+      broadcastSelfPresence('heartbeat');
+      const liveCount = calculateCurrentLiveCount();
+      updateLiveCounterUI(liveCount);
+    }, 10000);
+
+    // Prune stale visitors every 4 seconds
+    setInterval(() => {
+      const liveCount = calculateCurrentLiveCount();
+      updateLiveCounterUI(liveCount);
+    }, 4000);
+
+    window.addEventListener('beforeunload', () => {
+      broadcastSelfPresence('offline');
+    });
+
+  } catch (err) {
+    console.error('[Presence] Error initializing real-time presence:', err);
+  }
 }
 
 async function trackUserEvent(action = 'heartbeat', details = '') {
@@ -720,16 +885,23 @@ async function trackUserEvent(action = 'heartbeat', details = '') {
       body: JSON.stringify(payload)
     });
     const json = await res.json();
-    if (json.success && json.liveUsers !== undefined) {
-      if (el.headerLiveUsersText) {
-        el.headerLiveUsersText.textContent = `${json.liveUsers} Online`;
-      }
-      if (el.kpiLiveUsers) {
-        el.kpiLiveUsers.textContent = json.liveUsers;
+    if (json.success) {
+      if (json.countryCode) clientGeoInfo.country = json.countryCode;
+      if (json.city) clientGeoInfo.city = json.city;
+      if (json.flag) clientGeoInfo.flag = json.flag;
+
+      if (json.liveUsers !== undefined) {
+        const mqttCount = calculateCurrentLiveCount();
+        const effective = Math.max(json.liveUsers, mqttCount, 1);
+        updateLiveCounterUI(effective);
       }
     }
   } catch (err) {
     // Non-blocking telemetry
+  }
+
+  if (action && action !== 'heartbeat') {
+    broadcastLiveEvent(action, details);
   }
 }
 
@@ -977,10 +1149,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial Telemetry Ping
   trackUserEvent('pageview', 'Visited Home Dashboard');
 
-  // Background Heartbeat every 25 seconds
+  // Real-Time Cross-Device Presence Engine
+  initRealtimePresence();
+
+  // Fast Background Heartbeat every 8 seconds for dual-channel sync
   setInterval(() => {
     trackUserEvent('heartbeat');
-  }, 25000);
+  }, 8000);
 
   loadCountryData();
   loadEditorialLayout();
