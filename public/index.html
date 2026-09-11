@@ -78,6 +78,29 @@
           <span class="analytics-live-text" id="headerLiveUsersText">1 Online</span>
           <span class="analytics-pill-tag">📊 Analytics</span>
         </button>
+
+        <!-- Live Dollar & Global Currency Rates (Beside Analytics) -->
+        <div class="header-fx-wrap" id="headerFxWrap">
+          <button id="btnHeaderFx" class="btn-header-fx" title="Live Forex Rate to INR (Click to view all countries)">
+            <span class="fx-pulse-dot"></span>
+            <span class="fx-rate-text" id="headerFxRateText">🇺🇸 $1 = ₹86.85</span>
+            <span class="fx-badge-arrow">▾</span>
+          </button>
+
+          <!-- Dropdown Popover showing All Countries' Live Rates to INR -->
+          <div class="fx-dropdown-popover" id="fxDropdownPopover" style="display: none;">
+            <div class="fx-popover-header">
+              <span class="fx-popover-title">💱 LIVE STUDY ABROAD FOREX RATES</span>
+              <span class="fx-live-tag">● REAL-TIME (INR ₹)</span>
+            </div>
+            <div class="fx-rates-list" id="fxRatesList">
+              <!-- Dynamically populated for US, UK, Canada, Germany, Australia, Ireland -->
+            </div>
+            <div class="fx-popover-footer">
+              <span>Updated in real-time • Click any currency to switch destination</span>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>

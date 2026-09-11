@@ -1885,6 +1885,150 @@ body {
   transform: translateY(-1px);
 }
 
+/* Live Dollar & Global Forex Rate Badge */
+.header-fx-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.btn-header-fx {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fef08a;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-header-fx:hover {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: #f59e0b;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+}
+
+.fx-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fbbf24;
+  box-shadow: 0 0 8px #fbbf24;
+  animation: pulseBeacon 1.8s infinite;
+}
+
+.fx-rate-text {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  color: #fef08a;
+  letter-spacing: 0.2px;
+}
+
+.fx-badge-arrow {
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+/* Forex Dropdown Popover */
+.fx-dropdown-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 310px;
+  background: #ffffff;
+  border: 1.5px solid #f59e0b;
+  border-radius: 12px;
+  box-shadow: 0 16px 32px -4px rgba(15, 23, 42, 0.25);
+  padding: 14px;
+  z-index: 3500;
+  animation: hoverPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fx-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 8px;
+}
+
+.fx-popover-title {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #b45309;
+  letter-spacing: 0.5px;
+  font-family: var(--font-mono);
+}
+
+.fx-live-tag {
+  font-size: 0.62rem;
+  color: #16a34a;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.fx-rates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fx-rate-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fx-rate-row:hover {
+  background: #fef3c7;
+  border-color: #fde68a;
+  transform: translateX(2px);
+}
+
+.fx-rate-row.active {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  font-weight: 700;
+}
+
+.fx-country-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: #1e293b;
+}
+
+.fx-rate-val {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: #0f172a;
+}
+
+.fx-popover-footer {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 0.66rem;
+  color: #64748b;
+  text-align: center;
+}
+
 .live-dot-beacon {
   width: 8px;
   height: 8px;

@@ -276,6 +276,75 @@ app.get('/api/universities/:id/alumni', (req, res) => {
   }
 });
 
+// In-memory cached exchange rates
+let cachedForex = {
+  timestamp: 0,
+  rates: {
+    USD: 86.85,
+    GBP: 111.40,
+    CAD: 63.20,
+    EUR: 93.50,
+    AUD: 56.75
+  }
+};
+
+async function getLiveForexRates() {
+  const now = Date.now();
+  // Cache for 30 minutes
+  if (now - cachedForex.timestamp < 30 * 60 * 1000) {
+    return cachedForex.rates;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch('https://open.er-api.com/v6/latest/USD', { signal: controller.signal });
+    clearTimeout(timeout);
+    const data = await res.json();
+    if (data && data.rates && data.rates.INR) {
+      const inrPerUsd = data.rates.INR;
+      cachedForex = {
+        timestamp: now,
+        rates: {
+          USD: Number(inrPerUsd.toFixed(2)),
+          GBP: Number((inrPerUsd / data.rates.GBP).toFixed(2)),
+          EUR: Number((inrPerUsd / data.rates.EUR).toFixed(2)),
+          CAD: Number((inrPerUsd / data.rates.CAD).toFixed(2)),
+          AUD: Number((inrPerUsd / data.rates.AUD).toFixed(2))
+        }
+      };
+    }
+  } catch (e) {
+    // Keep cached rates
+  }
+  return cachedForex.rates;
+}
+
+// 13. Live Forex Rates for Study Abroad Destinations vs INR
+app.get('/api/forex', async (req, res) => {
+  try {
+    const rates = await getLiveForexRates();
+    const countriesForex = [
+      { countryCode: 'us', name: 'United States', currency: 'USD', symbol: '$', flag: '🇺🇸', inrRate: rates.USD, label: `1 USD = ₹${rates.USD}` },
+      { countryCode: 'uk', name: 'United Kingdom', currency: 'GBP', symbol: '£', flag: '🇬🇧', inrRate: rates.GBP, label: `1 GBP = ₹${rates.GBP}` },
+      { countryCode: 'ca', name: 'Canada', currency: 'CAD', symbol: 'C$', flag: '🇨🇦', inrRate: rates.CAD, label: `1 CAD = ₹${rates.CAD}` },
+      { countryCode: 'de', name: 'Germany', currency: 'EUR', symbol: '€', flag: '🇩🇪', inrRate: rates.EUR, label: `1 EUR = ₹${rates.EUR}` },
+      { countryCode: 'au', name: 'Australia', currency: 'AUD', symbol: 'A$', flag: '🇦🇺', inrRate: rates.AUD, label: `1 AUD = ₹${rates.AUD}` },
+      { countryCode: 'ie', name: 'Ireland', currency: 'EUR', symbol: '€', flag: '🇮🇪', inrRate: rates.EUR, label: `1 EUR = ₹${rates.EUR}` }
+    ];
+
+    res.json({
+      success: true,
+      base: 'INR',
+      timestamp: cachedForex.timestamp || Date.now(),
+      rates,
+      countries: countriesForex
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 export default app;
 
 if (!process.env.VERCEL) {

@@ -154,6 +154,12 @@ const el = {
   hoverAdvice: document.getElementById('hoverAdvice'),
   hoverSocialRow: document.getElementById('hoverSocialRow'),
 
+  // Live Currency & Forex Elements
+  btnHeaderFx: document.getElementById('btnHeaderFx'),
+  headerFxRateText: document.getElementById('headerFxRateText'),
+  fxDropdownPopover: document.getElementById('fxDropdownPopover'),
+  fxRatesList: document.getElementById('fxRatesList'),
+
   toastContainer: document.getElementById('toastContainer')
 };
 
@@ -1348,6 +1354,109 @@ function hideAlumniHoverCard() {
   }
 }
 
+// ==========================================================================
+// Live Dollar & Global Currency Rates Engine
+// ==========================================================================
+let globalForexData = {
+  USD: 86.85,
+  GBP: 111.40,
+  CAD: 63.20,
+  EUR: 93.50,
+  AUD: 56.75
+};
+
+const COUNTRY_CURRENCY_META = {
+  us: { flag: '🇺🇸', name: 'United States', symbol: '$', code: 'USD' },
+  uk: { flag: '🇬🇧', name: 'United Kingdom', symbol: '£', code: 'GBP' },
+  ca: { flag: '🇨🇦', name: 'Canada', symbol: 'C$', code: 'CAD' },
+  de: { flag: '🇩🇪', name: 'Germany', symbol: '€', code: 'EUR' },
+  au: { flag: '🇦🇺', name: 'Australia', symbol: 'A$', code: 'AUD' },
+  ie: { flag: '🇮🇪', name: 'Ireland', symbol: '€', code: 'EUR' }
+};
+
+function updateHeaderForexBadge() {
+  if (!el.headerFxRateText) return;
+  const currentCountry = (state.country || 'us').toLowerCase();
+  const meta = COUNTRY_CURRENCY_META[currentCountry] || COUNTRY_CURRENCY_META.us;
+  const rate = globalForexData[meta.code] || 86.85;
+
+  el.headerFxRateText.textContent = `${meta.flag} 1 ${meta.code} = ₹${rate.toFixed(2)}`;
+  
+  // Highlight active row in popover if open
+  renderForexDropdown();
+}
+
+function renderForexDropdown() {
+  if (!el.fxRatesList) return;
+
+  const currentCountry = (state.country || 'us').toLowerCase();
+  const countryList = [
+    { code: 'us', name: 'United States', curr: 'USD', flag: '🇺🇸' },
+    { code: 'uk', name: 'United Kingdom', curr: 'GBP', flag: '🇬🇧' },
+    { code: 'ca', name: 'Canada', curr: 'CAD', flag: '🇨🇦' },
+    { code: 'de', name: 'Germany', curr: 'EUR', flag: '🇩🇪' },
+    { code: 'au', name: 'Australia', curr: 'AUD', flag: '🇦🇺' },
+    { code: 'ie', name: 'Ireland', curr: 'EUR', flag: '🇮🇪' }
+  ];
+
+  el.fxRatesList.innerHTML = countryList.map(item => {
+    const rate = globalForexData[item.curr] || 86.85;
+    const isActive = item.code === currentCountry;
+
+    return `
+      <div class="fx-rate-row ${isActive ? 'active' : ''}" data-country="${item.code}">
+        <div class="fx-country-info">
+          <span>${item.flag}</span>
+          <span><strong>${item.name}</strong> (${item.curr})</span>
+        </div>
+        <div class="fx-rate-val">₹${rate.toFixed(2)}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Attach click listener to switch country from forex dropdown
+  el.fxRatesList.querySelectorAll('.fx-rate-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const targetCountry = row.getAttribute('data-country');
+      if (targetCountry && el.countryFilter) {
+        el.countryFilter.value = targetCountry;
+        el.countryFilter.dispatchEvent(new Event('change'));
+        closeForexPopover();
+      }
+    });
+  });
+}
+
+async function loadForexRates() {
+  try {
+    const res = await fetch('/api/forex');
+    const json = await res.json();
+    if (json.success && json.rates) {
+      globalForexData = json.rates;
+      updateHeaderForexBadge();
+    }
+  } catch (e) {
+    // Fallback keeps default rates
+  }
+}
+
+function toggleForexPopover() {
+  if (!el.fxDropdownPopover) return;
+  const isVisible = el.fxDropdownPopover.style.display === 'block';
+  if (isVisible) {
+    closeForexPopover();
+  } else {
+    renderForexDropdown();
+    el.fxDropdownPopover.style.display = 'block';
+  }
+}
+
+function closeForexPopover() {
+  if (el.fxDropdownPopover) {
+    el.fxDropdownPopover.style.display = 'none';
+  }
+}
+
 // Event Listeners
 function setupEvents() {
   // Country Selector in Top Left
@@ -1362,6 +1471,7 @@ function setupEvents() {
     loadEditorialLayout();
     loadBreakingTicker();
     loadFeedArticles();
+    updateHeaderForexBadge();
   });
 
   // Profession Selector in Top Left
@@ -1523,6 +1633,21 @@ function setupEvents() {
     });
   }
 
+  // Live Dollar / Forex Rate Badge Controls
+  if (el.btnHeaderFx) {
+    el.btnHeaderFx.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleForexPopover();
+    });
+  }
+
+  // Close forex popover when clicking anywhere else
+  document.addEventListener('click', (e) => {
+    if (el.fxDropdownPopover && !e.target.closest('#headerFxWrap')) {
+      closeForexPopover();
+    }
+  });
+
   // Dismiss hover card on window click / scroll
   window.addEventListener('scroll', () => {
     hideAlumniHoverCard();
@@ -1563,4 +1688,6 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFeedArticles();
   loadStats();
   loadUniversities();
+  loadForexRates();
+  updateHeaderForexBadge();
 });
