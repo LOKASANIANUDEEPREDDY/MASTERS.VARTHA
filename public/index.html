@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MASTERS.VARTHA | Global Master's Visa, Approval Rates & Salary Intelligence</title>
+  <meta name="description" content="Hourly scraped news, 2022-Present visa approval rates, and starting salary benchmarks for Indian students pursuing Master's abroad.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+</head>
+<body>
+
+  <!-- Top Global Editorial Header (Matching Image 1) -->
+  <header class="editorial-header">
+    <div class="header-inner">
+      
+      <!-- Top Left: Logo & Country/Profession Filters -->
+      <div class="header-left">
+        <a href="/" class="brand-logo">
+          <span class="logo-main">MASTERS</span><span class="logo-dot">.</span><span class="logo-sub">VARTHA</span>
+        </a>
+
+        <div class="nav-filters-group">
+          <!-- Country Filter Dropdown in Top Left -->
+          <div class="custom-select-wrap country-select-wrap">
+            <span class="select-prefix-label">DESTINATION:</span>
+            <select id="countryFilter" class="nav-dropdown" aria-label="Select Destination Country">
+              <option value="us" selected>🇺🇸 United States</option>
+              <option value="uk">🇬🇧 United Kingdom</option>
+              <option value="ca">🇨🇦 Canada</option>
+              <option value="de">🇩🇪 Germany</option>
+              <option value="au">🇦🇺 Australia</option>
+              <option value="ie">🇮🇪 Ireland</option>
+            </select>
+          </div>
+
+          <!-- Profession / Major Filter Dropdown in Top Left -->
+          <div class="custom-select-wrap profession-select-wrap">
+            <span class="select-prefix-label">FIELD:</span>
+            <select id="professionFilter" class="nav-dropdown" aria-label="Select Field of Study">
+              <option value="cs" selected>💻 Computer Science & Software</option>
+              <option value="ds">🤖 Data Science & AI / ML</option>
+              <option value="ba">📊 Business Analytics & MIS</option>
+              <option value="ece">⚡ Electrical & Computer (ECE)</option>
+              <option value="mba">💼 MBA & Management / Finance</option>
+              <option value="biotech">🧬 Biotech & Health Informatics</option>
+              <option value="mech">⚙️ Mechanical & Robotics</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Right: Navigation Links & Live Scraper Status -->
+      <div class="header-right">
+        <nav class="editorial-nav">
+          <a href="#latestNewsSection" class="nav-link active">LATEST NEWS <span class="nav-arrow">▾</span></a>
+          <a href="#visaSection" class="nav-link">VISA APPROVALS <span class="nav-arrow">▾</span></a>
+          <a href="#salarySection" class="nav-link">SALARIES & JOBS <span class="nav-arrow">▾</span></a>
+          <a href="#trendingSection" class="nav-link">TRENDING <span class="nav-arrow">▾</span></a>
+          <a href="#fullFeedSection" class="nav-link live-link">
+            <span class="live-pulse"></span>
+            HOURLY FEED
+          </a>
+        </nav>
+
+        <div class="header-scraper-badge">
+          <div class="badge-status-ring"></div>
+          <span class="scraper-countdown" id="topCountdownText">Next: --m --s</span>
+          <button id="btnTopScrape" class="btn-top-scrape" title="Trigger Instant Multi-Country Scrape">
+            <svg class="icon-refresh" id="topRefreshIcon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+              <path d="M23 4v6h-6"></path>
+              <path d="M1 20v-6h6"></path>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span id="topScrapeBtnText">Scrape</span>
+          </button>
+        </div>
+
+        <button id="btnOpenAnalytics" class="btn-analytics-badge" title="Open Real-time Visitor Analytics Dashboard">
+          <span class="live-dot-beacon"></span>
+          <span class="analytics-live-text" id="headerLiveUsersText">1 Online</span>
+          <span class="analytics-pill-tag">📊 Analytics</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Breaking News Ticker Bar (Matching Image 1) -->
+  <div class="breaking-news-bar">
+    <div class="breaking-inner">
+      <div class="breaking-tag">Breaking News:</div>
+      <div class="ticker-content" id="breakingTickerTrack">
+        <span class="ticker-item">Loading latest verified consular visa updates and tech job reports...</span>
+      </div>
+      <div class="ticker-date-badge" id="currentDateBadge">Today</div>
+    </div>
+  </div>
+
+  <main class="page-container">
+
+    <!-- Main Editorial Newsroom Grid (LATEST NEWS AT THE TOP Matching Image 1) -->
+    <div class="editorial-main-grid" id="latestNewsSection">
+      
+      <!-- Left Editorial Column (Hero Story + Side Stack + Metrics + Graphs + Trending) -->
+      <div class="editorial-left-col">
+        
+        <!-- Latest News Section Header Strip -->
+        <div class="latest-news-header-strip">
+          <div class="strip-left">
+            <span class="badge-live-tag">⚡ LATEST NEWS & DEVELOPMENTS</span>
+            <span class="badge-subtext">Real-time consular updates & Master's reports</span>
+            <span class="badge-no-spam">No Spam</span>
+          </div>
+          <span class="live-indicator-pill">● LIVE HOURLY UPDATES</span>
+        </div>
+
+        <!-- Hero Section: Featured Lead Story + 3 Stacked Side Cards (Image 1) -->
+        <section class="hero-editorial-section">
+          
+          <!-- Lead Story Card (Left 60%) -->
+          <article class="lead-story-card" id="leadStoryCard">
+            <div class="lead-image-wrap">
+              <img id="leadImage" src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=900&auto=format&fit=crop&q=80" alt="Featured Story Image" class="lead-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=900&auto=format&fit=crop&q=80'">
+              <div class="lead-category-pills">
+                <span class="pill-category" id="leadCategoryBadge">F-1 Student Visa</span>
+                <span class="pill-source-verified" id="leadSource">✓ Verified News</span>
+                <span class="pill-readtime" id="leadReadTime">6 Minutes</span>
+              </div>
+            </div>
+            <div class="lead-content">
+              <div class="lead-meta-strip">
+                <span class="badge-google-news">✓ Live Web Feed • Google News Verified</span>
+                <span class="lead-pubtime" id="leadPubTime">Latest</span>
+              </div>
+              <h2 class="lead-headline">
+                <a href="#" id="leadTitleLink" target="_blank" rel="noopener noreferrer">
+                  Loading the top verified intelligence report for Master's students...
+                </a>
+              </h2>
+              <p class="lead-excerpt" id="leadExcerpt">
+                Continuous scraping across USCIS, State Department, and global consulates is active.
+              </p>
+              <div class="lead-takeaway" id="leadTakeaway">
+                <strong>Master's Impact:</strong> Stay tuned for regulatory advisories and consulate interview windows.
+              </div>
+              <div class="lead-action-row">
+                <a href="#" target="_blank" rel="noopener noreferrer" class="btn-verify-news" id="leadVerifyBtn">
+                  🔗 Open Live Original Article on Official Publisher ↗
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- 3 Stacked Side Stories (Right 40% of Hero, Matching Image 1) -->
+          <div class="hero-side-stack" id="heroSideStack">
+            <!-- 3 cards injected via JS -->
+          </div>
+
+        </section>
+
+        <!-- Financial Metric Sparkline Cards (Matching Image 2) -->
+        <section class="metrics-ticker-section">
+          <div class="section-title-row" style="margin-bottom: 12px;">
+            <h3 class="section-heading" style="font-size: 1.15rem;">Market & Visa Indicators</h3>
+            <span class="badge-edition-sub">Real-Time Benchmarks</span>
+          </div>
+          <div class="metrics-ticker-grid">
+            
+            <!-- Card 1: Visa Approval Rate (2022 to Present) -->
+            <div class="metric-sparkline-card" id="cardVisaRate">
+              <div class="card-header-row">
+                <span class="metric-title" id="metric1Title">F-1 Visa Approval Rate</span>
+                <span class="metric-badge-tag" id="metric1Tag">2022 - 2026</span>
+              </div>
+              <div class="metric-body-row">
+                <div class="metric-number-col">
+                  <div class="metric-main-value" id="valVisaRate">--%</div>
+                  <div class="metric-trend-row trend-down" id="trendVisaRate">
+                    <span class="trend-arrow">↓</span>
+                    <span class="trend-text" id="diffVisaRate">--% YoY</span>
+                  </div>
+                </div>
+                <div class="sparkline-chart-wrap" id="sparklineVisaWrap">
+                  <!-- Inline SVG Sparkline -->
+                </div>
+              </div>
+              <div class="metric-footer-note" id="noteVisaRate">2026 Rate: --% • Rejection: --%</div>
+            </div>
+
+            <!-- Card 2: Average Starting Package / Salary -->
+            <div class="metric-sparkline-card" id="cardSalary">
+              <div class="card-header-row">
+                <span class="metric-title" id="metric2Title">Avg Starting Package</span>
+                <span class="metric-badge-tag highlight" id="metric2Tag">Computer Science</span>
+              </div>
+              <div class="metric-body-row">
+                <div class="metric-number-col">
+                  <div class="metric-main-value" id="valSalary">$--</div>
+                  <div class="metric-trend-row trend-up" id="trendSalary">
+                    <span class="trend-arrow">↑</span>
+                    <span class="trend-text" id="diffSalary">+--% YoY</span>
+                  </div>
+                </div>
+                <div class="sparkline-chart-wrap" id="sparklineSalaryWrap">
+                  <!-- Inline SVG Sparkline -->
+                </div>
+              </div>
+              <div class="metric-footer-note" id="noteSalary">Median package: $-- • 75th percentile: $--</div>
+            </div>
+
+            <!-- Card 3: Post-Study Work Permit Duration -->
+            <div class="metric-sparkline-card" id="cardWorkPermit">
+              <div class="card-header-row">
+                <span class="metric-title" id="metric3Title">Post-Study Work Permit</span>
+                <span class="metric-badge-tag" id="metric3Tag">STEM OPT</span>
+              </div>
+              <div class="metric-body-row">
+                <div class="metric-number-col">
+                  <div class="metric-main-value" id="valWorkDuration">36 <span class="val-unit">Months</span></div>
+                  <div class="metric-trend-row trend-up" id="trendWorkPermit">
+                    <span class="trend-arrow">✓</span>
+                    <span class="trend-text" id="diffWorkPermit">High Stability</span>
+                  </div>
+                </div>
+                <div class="sparkline-chart-wrap" id="sparklineWorkWrap">
+                  <!-- Inline SVG Sparkline -->
+                </div>
+              </div>
+              <div class="metric-footer-note" id="noteWorkPermit">12 Mo Initial OPT + 24 Mo STEM Extension</div>
+            </div>
+
+            <!-- Card 4: Job Market Hiring Demand Index -->
+            <div class="metric-sparkline-card" id="cardHiringIndex">
+              <div class="card-header-row">
+                <span class="metric-title" id="metric4Title">Tech Hiring Index</span>
+                <span class="metric-badge-tag" id="metric4Tag">Job Market</span>
+              </div>
+              <div class="metric-body-row">
+                <div class="metric-number-col">
+                  <div class="metric-main-value" id="valHiringIndex">-- <span class="val-unit">/100</span></div>
+                  <div class="metric-trend-row trend-up" id="trendHiringIndex">
+                    <span class="trend-arrow">↑</span>
+                    <span class="trend-text" id="diffHiringIndex">Active Hiring</span>
+                  </div>
+                </div>
+                <div class="sparkline-chart-wrap" id="sparklineHiringWrap">
+                  <!-- Inline SVG Sparkline -->
+                </div>
+              </div>
+              <div class="metric-footer-note" id="noteHiringIndex">Top Employers: Google, Amazon, Microsoft, NVIDIA</div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Visa Approval Rates Trend Graph (2022 to Present) Section -->
+        <section class="visa-graph-section" id="visaSection">
+          <div class="graph-card">
+            <div class="graph-card-header">
+              <div class="graph-title-group">
+                <span class="section-badge">OFFICIAL CONSULAR DATA</span>
+                <h2 class="graph-main-heading" id="graphHeading">F-1 Approval, H-1B Approval & Rejection Rates (2022 to Present)</h2>
+                <p class="graph-subheading" id="graphSubheading">Historical trajectory of F-1 student pass rates, H-1B petition approvals, and consular rejection rates</p>
+              </div>
+              <div class="graph-legend">
+                <div class="legend-item"><span class="legend-dot green"></span> F-1 Visa Approval (%)</div>
+                <div class="legend-item"><span class="legend-dot purple"></span> H-1B Approval Rate (%)</div>
+                <div class="legend-item"><span class="legend-dot red"></span> Visa Rejection Rate (%)</div>
+              </div>
+            </div>
+
+            <!-- Interactive SVG Chart Area -->
+            <div class="svg-chart-container" id="svgChartContainer">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Interactive Hover Year Details Strip -->
+            <div class="chart-inspector-bar" id="chartInspectionBox">
+              <span class="inspect-hint">💡 Hover or click any year on the graph above to inspect detailed consular metrics & applicant volume</span>
+            </div>
+
+            <!-- Historical Milestones Timeline -->
+            <div class="milestones-timeline-strip" id="milestonesTimeline">
+              <!-- Milestones rendered via JS -->
+            </div>
+
+            <!-- Official Government Source Citation Box -->
+            <div class="official-citation-box" id="officialCitationBox">
+              <div class="citation-left">
+                <span class="citation-icon">🏛️</span>
+                <div class="citation-text-group">
+                  <strong>Official Government Data Grounding & Verification:</strong>
+                  <span id="citationAgency">U.S. Department of State - Bureau of Consular Affairs (Report of the Visa Office Table XVI-B) & IIE Open Doors</span>
+                </div>
+              </div>
+              <a href="https://travel.state.gov/content/travel/en/legal/visa-law0/visa-statistics/nonimmigrant-visa-statistics.html" target="_blank" rel="noopener noreferrer" class="btn-verify-source" id="citationLink">
+                Verify on Official Government Portal ↗
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Trending News Section (Matching Image 1) -->
+        <section class="trending-section" id="trendingSection">
+          <div class="section-title-row">
+            <h3 class="section-heading">Trending News</h3>
+            <a href="#fullFeedSection" class="see-more-link">See More →</a>
+          </div>
+
+          <div class="trending-cards-grid" id="trendingCardsGrid">
+            <!-- 3-column photo cards injected via JS -->
+          </div>
+        </section>
+
+        <!-- Salary Benchmarks & Career Outlook Section -->
+        <section class="salary-breakdown-section" id="salarySection">
+          <div class="salary-card">
+            <div class="section-title-row">
+              <div>
+                <span class="section-badge">COMPENSATION INTELLIGENCE</span>
+                <h3 class="section-heading" id="salarySectionHeading">Starting Salaries for Computer Science in United States</h3>
+              </div>
+              <span class="badge-growth" id="salaryGrowthBadge">+7.4% YoY</span>
+            </div>
+
+            <div class="salary-percentile-grid">
+              <div class="percentile-box">
+                <span class="p-label">25th Percentile</span>
+                <span class="p-value" id="p25Val">$98,000</span>
+                <span class="p-sub">Entry Graduate</span>
+              </div>
+              <div class="percentile-box highlight">
+                <span class="p-label">Median (50th)</span>
+                <span class="p-value" id="p50Val">$118,500</span>
+                <span class="p-sub">Average Master's Package</span>
+              </div>
+              <div class="percentile-box">
+                <span class="p-label">75th Percentile</span>
+                <span class="p-value" id="p75Val">$142,000</span>
+                <span class="p-sub">High Growth Firms</span>
+              </div>
+              <div class="percentile-box">
+                <span class="p-label">90th Percentile</span>
+                <span class="p-value" id="p90Val">$175,000</span>
+                <span class="p-sub">Tier-1 Tech / Quantitative</span>
+              </div>
+            </div>
+
+            <div class="employers-row">
+              <span class="employers-label">Top Hiring Companies:</span>
+              <div class="employers-pills" id="topEmployersList">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Complete Hourly News Feed & Search Section -->
+        <section class="full-feed-section" id="fullFeedSection">
+          <div class="feed-filter-bar">
+            <div class="search-input-wrap">
+              <input type="text" id="feedSearchInput" placeholder="Search visa rules, embassy slots, salaries, university admissions..." autocomplete="off">
+              <button id="btnClearFeedSearch" class="btn-clear-search" style="display: none;">×</button>
+            </div>
+
+            <div class="feed-filter-selects">
+              <select id="feedCategorySelect" class="feed-select">
+                <option value="all">All News Categories</option>
+                <option value="f1-visa">🎓 Visa Policies & Regulations</option>
+                <option value="jobs">💼 Jobs, OPT & Salaries</option>
+                <option value="embassy-slots">🏛️ Embassy & Appointments</option>
+              </select>
+
+              <select id="feedTimeSelect" class="feed-select">
+                <option value="all">All Dates</option>
+                <option value="24h">Past 24 Hours</option>
+                <option value="7d">Past 7 Days</option>
+              </select>
+
+              <button class="btn-filter-toggle" id="btnSavedOnly">⭐ Saved</button>
+            </div>
+          </div>
+
+          <div class="feed-results-counter" id="feedResultsCount">Showing articles...</div>
+
+          <div class="feed-articles-list" id="feedArticlesList">
+            <!-- Full paginated feed injected via JS -->
+          </div>
+
+          <div class="feed-pagination" id="feedPagination">
+            <button class="btn-page-ctrl" id="btnPrevFeed" disabled>← Previous</button>
+            <span class="page-num-display" id="feedPageDisplay">Page 1 of 1</span>
+            <button class="btn-page-ctrl" id="btnNextFeed">Next →</button>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Right Editorial Sidebar (Matching Image 1: Latest News on Top Right) -->
+      <aside class="editorial-right-col">
+        
+        <!-- "Latest News" Widget (Matching Image 1 Top Right Sidebar) -->
+        <div class="sidebar-widget">
+          <h3 class="sidebar-widget-title">Latest News</h3>
+          <div class="latest-news-list" id="sidebarLatestList">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- "Weekly Highlight" Widget (Matching Image 1) -->
+        <div class="sidebar-widget weekly-widget">
+          <h3 class="sidebar-widget-title">Weekly Highlight</h3>
+          <div class="weekly-highlight-cards" id="sidebarWeeklyList">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Country Fast Facts Card -->
+        <div class="sidebar-widget facts-widget">
+          <h3 class="sidebar-widget-title" id="sidebarCountryTitle">🇺🇸 United States Fast Facts</h3>
+          <div class="facts-list">
+            <div class="fact-item">
+              <span class="fact-label">Primary Visa:</span>
+              <span class="fact-val" id="factVisa">F-1 Student Visa</span>
+            </div>
+            <div class="fact-item">
+              <span class="fact-label">Post-Study Work:</span>
+              <span class="fact-val" id="factWork">36 Months (STEM OPT)</span>
+            </div>
+            <div class="fact-item">
+              <span class="fact-label">Currency:</span>
+              <span class="fact-val" id="factCurrency">USD ($)</span>
+            </div>
+            <div class="fact-item">
+              <span class="fact-label">Main Indian Consulates:</span>
+              <span class="fact-val" id="factConsulates">Delhi, Mumbai, Hyd, Chennai</span>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+  <!-- Live Visitor Analytics Dashboard Modal -->
+  <div class="analytics-modal-backdrop" id="analyticsModal" style="display: none;">
+    <div class="analytics-modal-container">
+      
+      <!-- Modal Header -->
+      <div class="analytics-modal-header">
+        <div class="analytics-header-left">
+          <span class="analytics-badge-live">● REAL-TIME INTELLIGENCE</span>
+          <h2 class="analytics-modal-title">Live Visitor Analytics & Audience Intelligence</h2>
+          <p class="analytics-modal-subtitle">Tracking real-time active users, unique visitors, geo-distribution & engagement leaderboard</p>
+        </div>
+        <div class="analytics-header-actions">
+          <button id="btnRefreshAnalytics" class="btn-analytics-refresh" title="Refresh metrics">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+              <path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            Refresh
+          </button>
+          <button id="btnCloseAnalytics" class="btn-analytics-close" aria-label="Close Analytics Dashboard">✕</button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="analytics-modal-body">
+        
+        <!-- Row 1: KPI Stat Cards -->
+        <div class="analytics-kpi-grid">
+          <div class="analytics-kpi-card highlight-live">
+            <div class="kpi-card-header">
+              <span class="kpi-label">LIVE ONLINE NOW</span>
+              <span class="kpi-live-beacon">● ACTIVE</span>
+            </div>
+            <div class="kpi-value" id="kpiLiveUsers">1</div>
+            <div class="kpi-footer">Active within last 3 minutes</div>
+          </div>
+
+          <div class="analytics-kpi-card">
+            <div class="kpi-card-header">
+              <span class="kpi-label">TOTAL UNIQUE VISITORS</span>
+              <span class="kpi-icon">👥</span>
+            </div>
+            <div class="kpi-value" id="kpiTotalUnique">--</div>
+            <div class="kpi-footer">Distinct client sessions recorded</div>
+          </div>
+
+          <div class="analytics-kpi-card">
+            <div class="kpi-card-header">
+              <span class="kpi-label">TOTAL INTERACTIONS</span>
+              <span class="kpi-icon">⚡</span>
+            </div>
+            <div class="kpi-value" id="kpiTotalInteractions">--</div>
+            <div class="kpi-footer">Pageviews, filters & saved articles</div>
+          </div>
+
+          <div class="analytics-kpi-card">
+            <div class="kpi-card-header">
+              <span class="kpi-label">TOP VISITOR ORIGIN</span>
+              <span class="kpi-icon">🌍</span>
+            </div>
+            <div class="kpi-value" id="kpiTopCountry">--</div>
+            <div class="kpi-footer" id="kpiTopCountrySub">Majority audience</div>
+          </div>
+        </div>
+
+        <!-- Row 2: Geographic & Interest Analytics Grid -->
+        <div class="analytics-split-grid">
+          
+          <!-- Box A: Which country has more visitors -->
+          <div class="analytics-panel-card">
+            <div class="panel-card-header">
+              <div>
+                <h3 class="panel-title">🌍 Visitor Origin Countries ("Which Country Has More Visitors")</h3>
+                <p class="panel-subtitle">Audience breakdown detected from client connections</p>
+              </div>
+              <span class="panel-badge">GEOGRAPHIC DISTRIBUTION</span>
+            </div>
+            <div class="panel-card-body" id="visitorCountriesList">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Box B: Destination Preference -->
+          <div class="analytics-panel-card">
+            <div class="panel-card-header">
+              <div>
+                <h3 class="panel-title">🎯 Destination Interest Breakdown</h3>
+                <p class="panel-subtitle">What countries Indian students are researching most</p>
+              </div>
+              <span class="panel-badge">STUDY ABROAD DEMAND</span>
+            </div>
+            <div class="panel-card-body" id="destinationInterestList">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Row 3: User Activity Leaderboard ("Who uses more") -->
+        <div class="analytics-panel-card leaderboard-panel">
+          <div class="panel-card-header">
+            <div>
+              <h3 class="panel-title">🏆 Most Active Users Leaderboard ("Who Uses More")</h3>
+              <p class="panel-subtitle">Ranked by total interactions, articles read, filter searches & bookmarks</p>
+            </div>
+            <span class="panel-badge highlight">REAL-TIME RANKING</span>
+          </div>
+          <div class="leaderboard-table-wrap">
+            <table class="analytics-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Visitor Identifier</th>
+                  <th>Origin Location</th>
+                  <th>Device</th>
+                  <th>Target Destination</th>
+                  <th>Page Views</th>
+                  <th>Saved Bookmarks</th>
+                  <th>Total Actions</th>
+                  <th>Last Active</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardTableBody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Row 4: Real-time Live Activity Stream -->
+        <div class="analytics-panel-card">
+          <div class="panel-card-header">
+            <div>
+              <h3 class="panel-title">⚡ Live Activity Stream</h3>
+              <p class="panel-subtitle">Real-time telemetry stream of user actions</p>
+            </div>
+            <span class="panel-badge">EVENT LOG</span>
+          </div>
+          <div class="activity-stream-list" id="activityStreamList">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

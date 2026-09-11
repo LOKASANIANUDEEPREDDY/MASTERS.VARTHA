@@ -1,0 +1,23 @@
+{
+  "lastScrapedAt": "2026-09-11T19:30:00.475Z",
+  "nextScheduledScrapeAt": "2026-09-11T20:30:00.475Z",
+  "scrapeCount": 2,
+  "lastScrapeStats": {
+    "added": 0,
+    "total": 666
+  },
+  "bookmarks": [],
+  "readArticles": [],
+  "hourlyRuns": [
+    {
+      "timestamp": "2026-09-11T19:30:00.475Z",
+      "added": 0,
+      "totalExamined": 666
+    },
+    {
+      "timestamp": "2026-09-11T19:21:41.270Z",
+      "added": 657,
+      "totalExamined": 666
+    }
+  ]
+}

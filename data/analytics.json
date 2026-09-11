@@ -1,0 +1,109 @@
+{
+  "visitors": [
+    {
+      "id": "usr_test1",
+      "label": "Visitor #EST1",
+      "countryCode": "IN",
+      "city": "Hyderabad",
+      "views": 1,
+      "bookmarks": 0,
+      "filtersChanged": 1,
+      "totalInteractions": 2,
+      "firstSeen": 1789156606547,
+      "lastActiveAt": 1789156606552,
+      "device": "Desktop",
+      "lastDestination": "uk",
+      "lastProfession": "cs"
+    },
+    {
+      "id": "usr_test2",
+      "label": "Visitor #EST2",
+      "countryCode": "US",
+      "city": "Dallas",
+      "views": 0,
+      "bookmarks": 1,
+      "filtersChanged": 0,
+      "totalInteractions": 1,
+      "firstSeen": 1789156606552,
+      "lastActiveAt": 1789156606552,
+      "device": "Desktop",
+      "lastDestination": "us",
+      "lastProfession": "cs"
+    },
+    {
+      "id": "usr_test_local",
+      "label": "Visitor #OCAL",
+      "countryCode": "IN",
+      "city": "Hyderabad",
+      "views": 1,
+      "bookmarks": 0,
+      "filtersChanged": 0,
+      "totalInteractions": 1,
+      "firstSeen": 1789156709929,
+      "lastActiveAt": 1789156709929,
+      "device": "Desktop",
+      "lastDestination": "us",
+      "lastProfession": "cs"
+    }
+  ],
+  "events": [
+    {
+      "id": "ekuyagq",
+      "visitorId": "usr_test_local",
+      "visitorLabel": "Visitor #OCAL",
+      "countryCode": "IN",
+      "countryName": "India",
+      "flag": "🇮🇳",
+      "city": "Hyderabad",
+      "action": "pageview",
+      "details": "",
+      "destination": "US",
+      "timestamp": 1789156709929
+    },
+    {
+      "id": "ihf59em",
+      "visitorId": "usr_test1",
+      "visitorLabel": "Visitor #EST1",
+      "countryCode": "IN",
+      "countryName": "India",
+      "flag": "🇮🇳",
+      "city": "Hyderabad",
+      "action": "filter_country",
+      "details": "",
+      "destination": "UK",
+      "timestamp": 1789156606552
+    },
+    {
+      "id": "o74mt8c",
+      "visitorId": "usr_test2",
+      "visitorLabel": "Visitor #EST2",
+      "countryCode": "US",
+      "countryName": "United States",
+      "flag": "🇺🇸",
+      "city": "Dallas",
+      "action": "bookmark",
+      "details": "Saved H-1B article",
+      "destination": "US",
+      "timestamp": 1789156606552
+    },
+    {
+      "id": "5351nrn",
+      "visitorId": "usr_test1",
+      "visitorLabel": "Visitor #EST1",
+      "countryCode": "IN",
+      "countryName": "India",
+      "flag": "🇮🇳",
+      "city": "Hyderabad",
+      "action": "pageview",
+      "details": "",
+      "destination": "US",
+      "timestamp": 1789156606547
+    }
+  ],
+  "destinations": {
+    "us": 3,
+    "uk": 1
+  },
+  "totalEvents": 4,
+  "updatedAt": "2026-09-11T19:58:29.929Z"
+}
