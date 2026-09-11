@@ -615,6 +615,7 @@ async function loadFeedArticles() {
 
 // Countdown Ticker
 function updateCountdownTicker() {
+  if (!el.topCountdownText) return;
   if (!state.nextScrapeTime) {
     el.topCountdownText.textContent = 'Next: Hourly';
     return;
