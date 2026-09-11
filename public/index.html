@@ -59,6 +59,7 @@
           <a href="#latestNewsSection" class="nav-link active">LATEST NEWS <span class="nav-arrow">▾</span></a>
           <a href="#visaSection" class="nav-link">VISA APPROVALS <span class="nav-arrow">▾</span></a>
           <a href="#salarySection" class="nav-link">SALARIES & JOBS <span class="nav-arrow">▾</span></a>
+          <a href="#universitySection" class="nav-link">UNIVERSITIES & ALUMNI <span class="nav-arrow">▾</span></a>
           <a href="#trendingSection" class="nav-link">TRENDING <span class="nav-arrow">▾</span></a>
           <a href="#fullFeedSection" class="nav-link">HOURLY FEED</a>
         </nav>
@@ -352,6 +353,55 @@
           </div>
         </section>
 
+        <!-- University Rankings & Alumni Explorer Section -->
+        <section class="university-explorer-section" id="universitySection">
+          <div class="section-title-row">
+            <div>
+              <span class="section-subheading">GLOBAL ACADEMIC INTELLIGENCE</span>
+              <h2 class="section-heading">🏛️ Top Universities, Rankings & Alumni Directory</h2>
+            </div>
+            <div class="uni-header-badge">
+              <span class="uni-badge-count" id="uniCountBadge">10 Universities Available</span>
+            </div>
+          </div>
+
+          <!-- University Search & Filter Controls -->
+          <div class="uni-controls-card">
+            <div class="uni-search-wrap">
+              <span class="uni-search-icon">🔍</span>
+              <input type="text" id="uniSearchInput" placeholder="Search university by name, city, program, or alumni (e.g. CMU, Stanford, Oxford, Google)..." autocomplete="off">
+              <button id="btnClearUniSearch" class="btn-clear-uni-search" style="display: none;">×</button>
+            </div>
+
+            <div class="uni-filter-pills-row">
+              <div class="uni-country-pills" id="uniCountryPills">
+                <button class="uni-pill active" data-country="all">🌐 All Countries</button>
+                <button class="uni-pill" data-country="us">🇺🇸 USA</button>
+                <button class="uni-pill" data-country="uk">🇬🇧 UK</button>
+                <button class="uni-pill" data-country="ca">🇨🇦 Canada</button>
+                <button class="uni-pill" data-country="de">🇩🇪 Germany</button>
+                <button class="uni-pill" data-country="au">🇦🇺 Australia</button>
+                <button class="uni-pill" data-country="ie">🇮🇪 Ireland</button>
+              </div>
+
+              <div class="uni-program-pills" id="uniProgramPills">
+                <select id="uniProgramSelect" class="uni-select">
+                  <option value="all">All Fields & Degrees</option>
+                  <option value="computer science">💻 Computer Science</option>
+                  <option value="data science">📊 Data Science & AI</option>
+                  <option value="information systems">💼 Information Systems / MIS</option>
+                  <option value="engineering">⚙️ Engineering & Tech</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Universities Grid -->
+          <div class="universities-grid" id="universitiesGrid">
+            <!-- Injected via JS -->
+          </div>
+        </section>
+
         <!-- Complete Hourly News Feed & Search Section -->
         <section class="full-feed-section" id="fullFeedSection">
           <div class="feed-filter-bar">
@@ -585,6 +635,61 @@
 
       </div>
 
+    </div>
+  </div>
+
+  <!-- Dedicated Alumni Directory Modal -->
+  <div class="alumni-modal-backdrop" id="alumniModal" style="display: none;">
+    <div class="alumni-modal-container">
+      <div class="alumni-modal-header">
+        <div class="alumni-modal-header-left">
+          <div class="alumni-modal-badge" id="alumniModalBadge">🎓 ALUMNI NETWORK</div>
+          <h2 class="alumni-modal-title" id="alumniModalUniTitle">Carnegie Mellon University Alumni</h2>
+          <p class="alumni-modal-subtitle" id="alumniModalUniSub">Verified alumni graduated from Master's programs with LinkedIn and Instagram profiles</p>
+        </div>
+        <button id="btnCloseAlumniModal" class="btn-analytics-close" aria-label="Close Alumni Directory">✕</button>
+      </div>
+
+      <!-- Quick Hint Bar -->
+      <div class="alumni-hint-bar">
+        <span>💡 <strong>Tip:</strong> Hover over any alumni's name to view their background, previous college, and career advice!</span>
+      </div>
+
+      <div class="alumni-modal-body" id="alumniModalBody">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Floating Alumni Hover Detail Popover Card -->
+  <div class="alumni-hover-card" id="alumniHoverCard" style="display: none;">
+    <div class="hover-card-header">
+      <div class="hover-avatar" id="hoverAvatar">👨‍💻</div>
+      <div class="hover-title-col">
+        <h4 class="hover-name" id="hoverName">Aditya Varma</h4>
+        <div class="hover-degree" id="hoverDegree">MS in Computer Science • Class of 2023</div>
+      </div>
+    </div>
+    <div class="hover-role-banner">
+      <span class="hover-role-icon">💼</span>
+      <span class="hover-role-text" id="hoverRole">Senior Software Engineer @ Google</span>
+    </div>
+    <div class="hover-details-list">
+      <div class="hover-detail-row">
+        <span class="hover-detail-icon">🎓</span>
+        <span class="hover-detail-val" id="hoverUndergrad">Undergrad: IIT Madras (B.Tech CS)</span>
+      </div>
+      <div class="hover-detail-row">
+        <span class="hover-detail-icon">📍</span>
+        <span class="hover-detail-val" id="hoverLocation">Mountain View, CA</span>
+      </div>
+    </div>
+    <div class="hover-advice-box">
+      <span class="hover-advice-label">💬 Alumni Advice:</span>
+      <p class="hover-advice-text" id="hoverAdvice">Focus on distributed systems in Sem 1.</p>
+    </div>
+    <div class="hover-social-row" id="hoverSocialRow">
+      <!-- Injected LinkedIn / Instagram button links -->
     </div>
   </div>
 

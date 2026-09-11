@@ -14,7 +14,11 @@ const state = {
   feedTotalPages: 1,
   nextScrapeTime: null,
   countdownInterval: null,
-  isScraping: false
+  isScraping: false,
+  uniCountry: 'all',
+  uniProgram: 'all',
+  uniSearch: '',
+  activeAlumniList: []
 };
 
 // Cached DOM Elements
@@ -123,6 +127,32 @@ const el = {
   destinationInterestList: document.getElementById('destinationInterestList'),
   leaderboardTableBody: document.getElementById('leaderboardTableBody'),
   activityStreamList: document.getElementById('activityStreamList'),
+
+  // University Explorer Elements
+  universitiesGrid: document.getElementById('universitiesGrid'),
+  uniSearchInput: document.getElementById('uniSearchInput'),
+  btnClearUniSearch: document.getElementById('btnClearUniSearch'),
+  uniCountryPills: document.getElementById('uniCountryPills'),
+  uniProgramSelect: document.getElementById('uniProgramSelect'),
+  uniCountBadge: document.getElementById('uniCountBadge'),
+
+  // Alumni Modal Elements
+  alumniModal: document.getElementById('alumniModal'),
+  btnCloseAlumniModal: document.getElementById('btnCloseAlumniModal'),
+  alumniModalUniTitle: document.getElementById('alumniModalUniTitle'),
+  alumniModalUniSub: document.getElementById('alumniModalUniSub'),
+  alumniModalBody: document.getElementById('alumniModalBody'),
+
+  // Floating Alumni Hover Card
+  alumniHoverCard: document.getElementById('alumniHoverCard'),
+  hoverAvatar: document.getElementById('hoverAvatar'),
+  hoverName: document.getElementById('hoverName'),
+  hoverDegree: document.getElementById('hoverDegree'),
+  hoverRole: document.getElementById('hoverRole'),
+  hoverUndergrad: document.getElementById('hoverUndergrad'),
+  hoverLocation: document.getElementById('hoverLocation'),
+  hoverAdvice: document.getElementById('hoverAdvice'),
+  hoverSocialRow: document.getElementById('hoverSocialRow'),
 
   toastContainer: document.getElementById('toastContainer')
 };
@@ -1024,6 +1054,300 @@ function closeAnalyticsModal() {
   }
 }
 
+// ==========================================================================
+// University Rankings & Alumni Directory Explorer
+// ==========================================================================
+let currentUniversitiesList = [];
+const allAlumniLookup = new Map(); // name -> alumnus object for quick hover lookup
+
+async function loadUniversities() {
+  try {
+    const params = new URLSearchParams({
+      country: state.uniCountry,
+      program: state.uniProgram,
+      search: state.uniSearch
+    });
+    const res = await fetch(`/api/universities?${params}`);
+    const json = await res.json();
+    if (!json.success) return;
+
+    currentUniversitiesList = json.universities || [];
+    if (el.uniCountBadge) {
+      el.uniCountBadge.textContent = `${currentUniversitiesList.length} Universities Available`;
+    }
+
+    renderUniversitiesGrid(currentUniversitiesList);
+  } catch (err) {
+    console.error('Error loading universities:', err);
+  }
+}
+
+function renderUniversitiesGrid(universities) {
+  if (!el.universitiesGrid) return;
+
+  if (universities.length === 0) {
+    el.universitiesGrid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: #ffffff; border-radius: 8px; border: 1px dashed #cbd5e1;">
+        <span style="font-size: 2rem;">🔍</span>
+        <h3 style="margin: 8px 0; color: #1e293b;">No universities found</h3>
+        <p style="color: #64748b; font-size: 0.85rem;">Try adjusting your search query or selecting "All Countries".</p>
+      </div>
+    `;
+    return;
+  }
+
+  el.universitiesGrid.innerHTML = universities.map(u => {
+    const flag = {
+      us: '🇺🇸', uk: '🇬🇧', ca: '🇨🇦', de: '🇩🇪', au: '🇦🇺', ie: '🇮🇪'
+    }[u.country] || '🌐';
+
+    const alumniCount = u.alumni ? u.alumni.length : 0;
+
+    return `
+      <div class="uni-card" id="uniCard_${u.id}">
+        <div class="uni-card-top">
+          <div class="uni-card-badge">${u.badge || '🏛️'}</div>
+          <div class="uni-card-title-col">
+            <h3 class="uni-card-title">${u.name}</h3>
+            <div class="uni-card-loc">${flag} ${u.city}${u.state ? ', ' + u.state : ''}</div>
+          </div>
+        </div>
+
+        <div class="uni-rankings-box">
+          <span class="uni-rank-tag qs">🏆 QS: ${u.rankings?.qsWorld || 'Ranked'}</span>
+          <span class="uni-rank-tag usnews">📰 US News: ${u.rankings?.usNews || 'Ranked'}</span>
+          <span class="uni-rank-tag the">🌐 THE: ${u.rankings?.theWorld || 'Ranked'}</span>
+        </div>
+
+        <div class="uni-stats-list">
+          <div class="uni-stat-row">
+            <span class="uni-stat-label">Acceptance Rate</span>
+            <span class="uni-stat-val" style="color: #ea580c;">${u.admissions?.acceptanceRate || 'N/A'}</span>
+          </div>
+          <div class="uni-stat-row">
+            <span class="uni-stat-label">Annual Tuition</span>
+            <span class="uni-stat-val">${u.admissions?.annualTuition || 'N/A'}</span>
+          </div>
+          <div class="uni-stat-row">
+            <span class="uni-stat-label">Work Authorization</span>
+            <span class="uni-stat-val" style="color: #16a34a;">${u.admissions?.workPermit || 'Post-Study Work'}</span>
+          </div>
+          <div class="uni-stat-row">
+            <span class="uni-stat-label">Benchmark Scores</span>
+            <span class="uni-stat-val">${u.admissions?.avgGre || u.admissions?.minIelts || 'Standard'}</span>
+          </div>
+        </div>
+
+        <div class="uni-programs-wrap">
+          ${(u.programs || []).map(p => `<span class="uni-program-tag">${p}</span>`).join('')}
+        </div>
+
+        <div class="uni-card-bottom">
+          <button class="btn-view-alumni" data-uni-id="${u.id}">
+            🎓 View Alumni (${alumniCount} Verified) →
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Attach click listener on View Alumni buttons
+  el.universitiesGrid.querySelectorAll('.btn-view-alumni').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const uniId = btn.getAttribute('data-uni-id');
+      openAlumniModal(uniId);
+    });
+  });
+}
+
+async function openAlumniModal(uniId) {
+  if (!el.alumniModal) return;
+  try {
+    const res = await fetch(`/api/universities/${uniId}/alumni?program=${state.uniProgram}`);
+    const json = await res.json();
+    if (!json.success) return;
+
+    const uni = json.university;
+    const alumni = json.alumni || [];
+
+    if (el.alumniModalUniTitle) {
+      el.alumniModalUniTitle.textContent = `${uni.badge || '🏛️'} ${uni.name} Alumni`;
+    }
+    if (el.alumniModalUniSub) {
+      el.alumniModalUniSub.textContent = `${alumni.length} verified Indian Master's alumni in global tech & engineering careers`;
+    }
+
+    // Populate lookup
+    alumni.forEach(a => {
+      allAlumniLookup.set(a.name, a);
+    });
+
+    if (el.alumniModalBody) {
+      if (alumni.length === 0) {
+        el.alumniModalBody.innerHTML = `<div style="text-align:center; padding: 30px; color:#64748b;">No alumni found for selected program filter.</div>`;
+      } else {
+        el.alumniModalBody.innerHTML = `
+          <div class="alumni-grid">
+            ${alumni.map(a => `
+              <div class="alumnus-card" data-alumnus-name="${a.name}">
+                <div class="alumnus-top-row">
+                  <div class="alumnus-avatar">${a.avatar || '👨‍🎓'}</div>
+                  <div class="alumnus-info-col">
+                    <span class="alumni-name-trigger" data-name="${a.name}" title="Hover for details & advice">${a.name}</span>
+                    <div class="alumnus-program-tag">${a.program} • Class of '${String(a.gradYear).slice(-2)}</div>
+                  </div>
+                </div>
+
+                <div class="alumnus-role-row">
+                  <span>💼</span>
+                  <span><strong>${a.currentRole}</strong> @ ${a.company}</span>
+                </div>
+
+                <div style="font-size: 0.72rem; color: #64748b;">
+                  📍 ${a.location} • 🎓 ${a.undergradOrigin}
+                </div>
+
+                <div class="alumnus-social-row">
+                  ${a.linkedin ? `
+                    <a href="${a.linkedin}" target="_blank" rel="noopener noreferrer" class="alumni-social-btn linkedin" title="Open LinkedIn Profile">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                      </svg>
+                      LinkedIn
+                    </a>
+                  ` : ''}
+
+                  ${a.instagram ? `
+                    <a href="${a.instagram}" target="_blank" rel="noopener noreferrer" class="alumni-social-btn instagram" title="Open Instagram Profile">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      </svg>
+                      Instagram
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        setupAlumniHoverListeners();
+      }
+    }
+
+    el.alumniModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    trackUserEvent('view_alumni', `Viewed alumni directory for ${uni.shortName || uni.name}`);
+  } catch (err) {
+    console.error('Error opening alumni modal:', err);
+  }
+}
+
+function closeAlumniModal() {
+  if (el.alumniModal) {
+    el.alumniModal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  hideAlumniHoverCard();
+}
+
+function setupAlumniHoverListeners() {
+  const triggers = document.querySelectorAll('.alumni-name-trigger');
+  triggers.forEach(trigger => {
+    trigger.addEventListener('mouseenter', (e) => {
+      const name = trigger.getAttribute('data-name');
+      const alumnus = allAlumniLookup.get(name);
+      if (alumnus) {
+        showAlumniHoverCard(alumnus, e.clientX, e.clientY);
+      }
+    });
+
+    trigger.addEventListener('mousemove', (e) => {
+      positionAlumniHoverCard(e.clientX, e.clientY);
+    });
+
+    trigger.addEventListener('mouseleave', () => {
+      hideAlumniHoverCard();
+    });
+
+    // Touch support for mobile devices
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const name = trigger.getAttribute('data-name');
+      const alumnus = allAlumniLookup.get(name);
+      if (alumnus) {
+        showAlumniHoverCard(alumnus, e.clientX, e.clientY);
+      }
+    });
+  });
+}
+
+function showAlumniHoverCard(a, x, y) {
+  if (!el.alumniHoverCard) return;
+
+  if (el.hoverAvatar) el.hoverAvatar.textContent = a.avatar || '👨‍🎓';
+  if (el.hoverName) el.hoverName.textContent = a.name;
+  if (el.hoverDegree) el.hoverDegree.textContent = `${a.program} • Class of ${a.gradYear}`;
+  if (el.hoverRole) el.hoverRole.textContent = `${a.currentRole} @ ${a.company}`;
+  if (el.hoverUndergrad) el.hoverUndergrad.textContent = `Undergrad: ${a.undergradOrigin}`;
+  if (el.hoverLocation) el.hoverLocation.textContent = a.location;
+  if (el.hoverAdvice) el.hoverAdvice.textContent = a.advice || 'Reach out on LinkedIn for referrals and guidance.';
+
+  if (el.hoverSocialRow) {
+    el.hoverSocialRow.innerHTML = `
+      ${a.linkedin ? `
+        <a href="${a.linkedin}" target="_blank" rel="noopener noreferrer" class="alumni-social-btn linkedin" style="pointer-events: auto;">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+          LinkedIn
+        </a>
+      ` : ''}
+      ${a.instagram ? `
+        <a href="${a.instagram}" target="_blank" rel="noopener noreferrer" class="alumni-social-btn instagram" style="pointer-events: auto;">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          Instagram
+        </a>
+      ` : ''}
+    `;
+  }
+
+  el.alumniHoverCard.style.display = 'flex';
+  positionAlumniHoverCard(x, y);
+}
+
+function positionAlumniHoverCard(x, y) {
+  if (!el.alumniHoverCard || el.alumniHoverCard.style.display === 'none') return;
+
+  const cardWidth = 330;
+  const cardHeight = el.alumniHoverCard.offsetHeight || 280;
+  const margin = 16;
+
+  let left = x + 18;
+  let top = y - 30;
+
+  if (left + cardWidth > window.innerWidth - margin) {
+    left = x - cardWidth - 18;
+  }
+  if (left < margin) {
+    left = margin;
+  }
+
+  if (top + cardHeight > window.innerHeight - margin) {
+    top = window.innerHeight - cardHeight - margin;
+  }
+  if (top < margin) {
+    top = margin;
+  }
+
+  el.alumniHoverCard.style.left = `${left}px`;
+  el.alumniHoverCard.style.top = `${top}px`;
+}
+
+function hideAlumniHoverCard() {
+  if (el.alumniHoverCard) {
+    el.alumniHoverCard.style.display = 'none';
+  }
+}
+
 // Event Listeners
 function setupEvents() {
   // Country Selector in Top Left
@@ -1137,6 +1461,72 @@ function setupEvents() {
       loadFeedArticles();
     }
   });
+
+  // University Explorer Event Listeners
+  if (el.uniCountryPills) {
+    el.uniCountryPills.addEventListener('click', (e) => {
+      const pill = e.target.closest('.uni-pill');
+      if (!pill) return;
+      el.uniCountryPills.querySelectorAll('.uni-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      state.uniCountry = pill.getAttribute('data-country') || 'all';
+      loadUniversities();
+      trackUserEvent('filter_university_country', `Filtered universities: ${state.uniCountry.toUpperCase()}`);
+    });
+  }
+
+  if (el.uniProgramSelect) {
+    el.uniProgramSelect.addEventListener('change', (e) => {
+      state.uniProgram = e.target.value;
+      loadUniversities();
+      trackUserEvent('filter_university_program', `Selected degree field: ${state.uniProgram}`);
+    });
+  }
+
+  let uniSearchDebounce = null;
+  if (el.uniSearchInput) {
+    el.uniSearchInput.addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      if (el.btnClearUniSearch) {
+        el.btnClearUniSearch.style.display = val ? 'block' : 'none';
+      }
+      clearTimeout(uniSearchDebounce);
+      uniSearchDebounce = setTimeout(() => {
+        state.uniSearch = val;
+        loadUniversities();
+        if (val) {
+          trackUserEvent('search_university', `Searched universities: ${val}`);
+        }
+      }, 250);
+    });
+  }
+
+  if (el.btnClearUniSearch) {
+    el.btnClearUniSearch.addEventListener('click', () => {
+      el.uniSearchInput.value = '';
+      el.btnClearUniSearch.style.display = 'none';
+      state.uniSearch = '';
+      loadUniversities();
+    });
+  }
+
+  // Close Alumni Directory Modal
+  if (el.btnCloseAlumniModal) {
+    el.btnCloseAlumniModal.addEventListener('click', closeAlumniModal);
+  }
+
+  if (el.alumniModal) {
+    el.alumniModal.addEventListener('click', (e) => {
+      if (e.target === el.alumniModal) {
+        closeAlumniModal();
+      }
+    });
+  }
+
+  // Dismiss hover card on window click / scroll
+  window.addEventListener('scroll', () => {
+    hideAlumniHoverCard();
+  }, { passive: true });
 }
 
 // Initial Boot
@@ -1172,4 +1562,5 @@ document.addEventListener('DOMContentLoaded', () => {
   loadBreakingTicker();
   loadFeedArticles();
   loadStats();
+  loadUniversities();
 });

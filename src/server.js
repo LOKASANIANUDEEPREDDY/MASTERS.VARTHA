@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { store } from './store.js';
 import { analyticsStore } from './analyticsStore.js';
 import { getCountryProfessionIntelligence, COUNTRIES, PROFESSIONS } from './countryData.js';
+import { queryUniversities, getUniversityById } from './universityData.js';
 import { startScheduler, triggerScrape, getSchedulerStatus } from './scheduler.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -219,6 +220,57 @@ app.get('/api/analytics/stats', (req, res) => {
   try {
     const stats = analyticsStore.getStats();
     res.json(stats);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 11. University Rankings & Explorer
+app.get('/api/universities', (req, res) => {
+  try {
+    const { country = 'all', search = '', program = 'all' } = req.query;
+    const universities = queryUniversities({ country, search, program });
+    res.json({
+      success: true,
+      total: universities.length,
+      universities
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 12. University Alumni Directory with LinkedIn & Instagram Profiles
+app.get('/api/universities/:id/alumni', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { program = 'all' } = req.query;
+    const uni = getUniversityById(id);
+    if (!uni) {
+      return res.status(404).json({ success: false, error: 'University not found' });
+    }
+    let alumni = uni.alumni || [];
+    if (program && program !== 'all') {
+      const p = program.toLowerCase();
+      alumni = alumni.filter(a => a.program.toLowerCase().includes(p));
+    }
+    res.json({
+      success: true,
+      university: {
+        id: uni.id,
+        name: uni.name,
+        shortName: uni.shortName,
+        country: uni.country,
+        city: uni.city,
+        state: uni.state,
+        badge: uni.badge,
+        rankings: uni.rankings,
+        admissions: uni.admissions,
+        programs: uni.programs
+      },
+      total: alumni.length,
+      alumni
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
